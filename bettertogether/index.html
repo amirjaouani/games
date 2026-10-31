@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f3e9">
+<title>Better Together — Carte, domande, conversazioni</title>
+<style>
+:root {
+  --cream: #f7f3e9;
+  --ink: #244b38;
+  --green: #dfe9d9;
+  --green-dark: #355f47;
+  --gold: #f4e5c5;
+  --gold-dark: #8b611f;
+  --lilac: #e8dded;
+  --lilac-dark: #684d7c;
+  --paper: #fffdf7;
+  --muted: #6c756b;
+  --shadow: 0 14px 35px rgba(54, 61, 42, .12);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; color: var(--ink);
+  background:
+    radial-gradient(ellipse at 0% 100%, rgba(208,222,199,.45), transparent 32%),
+    radial-gradient(ellipse at 100% 0%, rgba(243,224,190,.45), transparent 35%),
+    var(--cream);
+  font-family: ui-rounded, "Avenir Next", Avenir, "Segoe UI", sans-serif;
+}
+button { font: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid #6c8c71; outline-offset: 3px; }
+.app { width: min(100% - 32px, 760px); margin: 0 auto; padding: 28px 0 36px; }
+.topline { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.brand-small { font-family: Georgia, serif; font-size: 18px; font-weight: bold; }
+.text-button { border:0; background:transparent; color:var(--ink); padding:10px; border-radius:12px; }
+.text-button:hover { background:rgba(36,75,56,.07); }
+.hero { text-align:center; padding: 38px 0 24px; }
+.leaf { font-size: 38px; line-height:1; margin-bottom: 12px; }
+h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(40px, 8vw, 62px); letter-spacing:-1.8px; margin:0; font-weight:500; }
+.tagline { line-height:1.65; color:#4f6557; margin:14px 0 0; font-size:16px; }
+.section-title { text-align:center; font-family:Georgia,serif; font-size:21px; font-weight:normal; margin: 22px 0 16px; }
+.levels { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.level {
+  min-height:150px; border:1px solid transparent; border-radius:20px; padding:18px 10px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px;
+  transition: transform .18s, box-shadow .18s; text-align:center;
+}
+.level:hover { transform:translateY(-3px); box-shadow:var(--shadow); }
+.level.selected { border-color:currentColor; box-shadow:0 0 0 2px rgba(255,255,255,.8) inset; }
+.level .symbol { font-size:27px; }
+.level strong { font-family:Georgia,serif; font-size:20px; font-weight:normal; }
+.level span:last-child { font-size:12px; line-height:1.4; }
+.light { background:var(--green); color:var(--green-dark); }
+.medium { background:var(--gold); color:var(--gold-dark); }
+.deep { background:var(--lilac); color:var(--lilac-dark); }
+.primary {
+  border:0; background:var(--green-dark); color:white; border-radius:999px;
+  padding:15px 26px; min-height:50px; font-weight:600; box-shadow:0 5px 12px rgba(53,95,71,.13);
+}
+.primary:hover { filter:brightness(1.06); }
+.secondary {
+  border:1px solid #cfcbbb; background:rgba(255,253,247,.55); color:var(--ink);
+  border-radius:999px; padding:13px 20px; min-height:48px;
+}
+.secondary:hover { background:white; }
+.start-wrap { text-align:center; margin:26px 0 20px; }
+.footer-note { text-align:center; color:var(--muted); font-size:13px; margin-top:28px; }
+.hidden { display:none !important; }
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+.game-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:26px 0 10px; }
+.game-level { font-family:Georgia,serif; font-size:26px; margin:0; font-weight:normal; }
+.remaining { font-size:13px; color:var(--muted); margin-top:6px; }
+.progress { height:5px; border-radius:99px; background:#e7e2d6; overflow:hidden; margin:16px 0 24px; }
+.progress > div { height:100%; width:100%; transition:width .25s; background:var(--green-dark); }
+.deck-area { display:flex; flex-direction:column; align-items:center; }
+.card-stage { width:min(100%, 390px); height: min(112vw, 460px); min-height:330px; max-height:460px; perspective:1200px; }
+.card { width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .65s cubic-bezier(.2,.75,.25,1); cursor:pointer; }
+.card.flipped { transform:rotateY(180deg); }
+.card-face {
+  position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  border-radius:28px; padding:18px; background:var(--paper); box-shadow:var(--shadow);
+}
+.card-inner {
+  width:100%; height:100%; border-radius:20px; border:1px solid rgba(40,60,42,.12);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  padding:28px; position:relative; overflow:hidden;
+}
+.card-back .card-inner { background:var(--green); color:var(--green-dark); border:1px solid rgba(53,95,71,.3); }
+.card-back .big-leaf { font-size:76px; }
+.card-back .tap-hint { position:absolute; bottom:24px; font-size:13px; }
+.card-front { transform:rotateY(180deg); }
+.card-front.light .card-inner { background:linear-gradient(145deg,#e8efdf,#dce8d4); }
+.card-front.medium .card-inner { background:linear-gradient(145deg,#f8ebcf,#f0dfb9); }
+.card-front.deep .card-inner { background:linear-gradient(145deg,#eee4f1,#e1d3e9); }
+.card-symbol { font-size:30px; margin-bottom:24px; }
+.question { font-family:Georgia,serif; font-size:clamp(25px,5vw,34px); line-height:1.35; font-weight:normal; margin:0; }
+.card-decoration { position:absolute; bottom:20px; font-size:18px; opacity:.8; }
+.actions { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:24px; }
+.actions button { min-width:145px; }
+.help { text-align:center; color:var(--muted); font-size:13px; margin-top:18px; line-height:1.5; }
+.notice { text-align:center; background:rgba(255,253,247,.75); border:1px solid #e5dfd1; border-radius:16px; padding:15px; margin-top:18px; font-size:14px; line-height:1.5; }
+@media (max-width:520px) {
+ .app { width:min(100% - 22px, 760px); padding-top:16px; }
+ .hero { padding-top:28px; }
+ .levels { gap:7px; }
+ .level { min-height:137px; padding:13px 5px; border-radius:16px; }
+ .level strong { font-size:17px; }
+ .level span:last-child { font-size:11px; }
+ .card-stage { min-height:320px; height:112vw; max-height:420px; }
+ .card-face { padding:12px; border-radius:24px; }
+ .card-inner { border-radius:17px; padding:20px; }
+ .actions button { flex:1; min-width:125px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none !important; scroll-behavior:auto !important; } }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topline">
+    <div class="brand-small">✿ Better Together</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <label for="languageSelect" class="sr-only">Lingua / Logha</label>
+      <select id="languageSelect" aria-label="Lingua / Logha" style="border:1px solid #d8d2c5;background:#fffdf7;color:#244b38;border-radius:999px;padding:9px 12px;font:inherit;max-width:145px">
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="tn">🇹🇳 Tounsi (latin)</option>
+      </select>
+      <button class="text-button hidden" id="homeButton" type="button" aria-label="Torna alla home">← Home</button>
+    </div>
+  </header>
+
+  <section id="homeScreen">
+    <div class="hero">
+      <div class="leaf" aria-hidden="true">❧</div>
+      <h1>Better Together</h1>
+      <p class="tagline" data-i18n="tagline">Carte, domande, conversazioni.<br>Per conoscersi davvero.</p>
+    </div>
+    <h2 class="section-title" data-i18n="chooseLevel">Scegli il livello di profondità</h2>
+    <div class="levels" role="group" aria-label="Livello di profondità">
+      <button class="level light selected" data-level="light" type="button" aria-pressed="true">
+        <span class="symbol">❧</span><strong data-i18n="lightName">Leggere</strong><span data-i18n="lightDesc">Per rompere<br>il ghiaccio</span>
+      </button>
+      <button class="level medium" data-level="medium" type="button" aria-pressed="false">
+        <span class="symbol">○</span><strong data-i18n="mediumName">Medie</strong><span data-i18n="mediumDesc">Esperienze<br>e relazioni</span>
+      </button>
+      <button class="level deep" data-level="deep" type="button" aria-pressed="false">
+        <span class="symbol">♡</span><strong data-i18n="deepName">Profonde</strong><span data-i18n="deepDesc">Riflessioni<br>personali</span>
+      </button>
+    </div>
+    <div class="start-wrap"><button class="primary" id="startButton" type="button" data-i18n="start">Inizia il gioco&nbsp; →</button></div>
+    <p class="footer-note" data-i18n="footer">Nessuna risposta è obbligatoria. Ascoltatevi, senza giudicare.</p>
+  </section>
+
+  <section id="gameScreen" class="hidden">
+    <div class="game-head">
+      <div><h2 class="game-level" id="levelTitle">Livello Leggero</h2><div class="remaining" id="remaining">Carte rimaste: 0</div></div>
+      <button class="text-button" id="changeLevelButton" type="button" data-i18n="changeLevel">Cambia livello</button>
+    </div>
+    <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+    <div class="deck-area">
+      <div class="card-stage">
+        <div class="card" id="playingCard" role="button" tabindex="0" aria-label="Gira la carta per scoprire la domanda">
+          <div class="card-face card-back">
+            <div class="card-inner"><div class="big-leaf">❧</div><div class="tap-hint" id="tapHint">Tocca la carta per scoprirla</div></div>
+          </div>
+          <div class="card-face card-front light" id="cardFront">
+            <div class="card-inner"><div class="card-symbol" id="cardSymbol">❧</div><p class="question" id="questionText">Qual è il posto più bello in cui sei stato/a?</p><div class="card-decoration">— ❧ —</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="nextButton" type="button">Pesca un'altra carta ↻</button>
+        <button class="secondary hidden" id="skipButton" type="button">Salta questa domanda →</button>
+      </div>
+      <p class="help" id="helpText">Girate la carta e lasciate spazio a tutti per rispondere.</p>
+    </div>
+    <div class="notice" id="noticeText">💛 Potete rispondere a turno o liberamente. Se una domanda mette a disagio qualcuno, passate alla prossima.</div>
+  </section>
+</main>
+<script>
+const questions = {
+  it: {
+    light: [
+      "Qual è il posto più bello in cui sei stato/a?",
+      "Quale piccola cosa ti migliora subito la giornata?",
+      "Quale film/programma guarderesti all'infinito?",
+      "Qual è un ricordo che ti fa sempre sorridere?",
+      "Se potessi partire domani, dove andresti?",
+      "Quale talento ti piacerebbe avere?",
+      "Come sarebbe per te una giornata perfetta?",
+      "Qual è un cibo che non ti stancheresti mai di mangiare?",
+      "Preferisci organizzare tutto o lasciarti sorprendere?",
+      "Qual è una cosa nuova che vorresti provare?"
+    ],
+    medium: [
+      "Chi è la persona che ti ha influenzato di più nella vita?",
+      "Quale scelta ha cambiato il tuo percorso?",
+      "Di quale esperienza sei particolarmente fiero/a?",
+      "Che cosa hai imparato da un errore importante?",
+      "In quali momenti ti senti più te stesso/a?",
+      "Che cosa apprezzi di più in un'amicizia?",
+      "Quale abitudine ti ha fatto bene nel tempo?",
+      "Che cosa vorresti imparare a fare meglio?",
+      "Qual è un consiglio che non hai dimenticato?",
+      "Che cosa significa per te sentirti capito/a?"
+    ],
+    deep: [
+      "C'è qualcosa che hai fatto e che ti pesa ancora oggi?",
+      "Qual è una cosa che vorresti che gli altri capissero meglio di te?",
+      "Quale paura vorresti riuscire a superare?",
+      "Quando ti è stato difficile chiedere aiuto?",
+      "C'è qualcosa che stai cercando di perdonare a te stesso/a?",
+      "Che cosa fai fatica a dire ad alta voce?",
+      "In quale momento della vita ti sei sentito/a più vulnerabile?",
+      "Che cosa temi di perdere e perché?",
+      "Che cosa significa per te sentirti davvero accettato/a?",
+      "C'è qualcosa che vorresti lasciarti alle spalle?"
+    ]
+  },
+  tn: {
+    light: [
+      "Chnowa a7la blassa mcheetelha fi 7yetek?",
+      "Chnowa 7aja sghira tnajem t7assenlek nharek?",
+      "Chnowa el barnemej elly tnajem tetfarrej fyh dima w ma tmelch mennou?",
+      "Chnowa dhikra dima tkhallik tetbassem?",
+      "Ken tnajem tsefer ghodwa, win temchi?",
+      "Chnowa el mawhba elli tetmanna tkoun 3andek?",
+      "Kifech tetkhayel nhar parfait bennesba lik?",
+      "Chnowa el mekla elly tnajem tekelha dima w ma tmelch menha?",
+      "T7eb tkhattet kol chay walla tkhalli rou7ek lel mofaja2et?",
+      "Chnowa 7aja jdida tetmanna tjarrabha?"
+    ],
+    medium: [
+      "Chkoun akther ensen ather fik fi 7yetek?",
+      "Chnowa el 9arar elli baddallek masar 7yetek?",
+      "Anehi tajrba enti fakhour b'rou7ek barcha biha?",
+      "Chnowa ta3allemt men ghalta mohema?",
+      "Waqtech t7ess rou7ek 3la tabi3tek?",
+      "Chnowa akther 7aja t9adderha fi s7abtek?",
+      "Chnowa 3ada 3awnetek barcha m3a el wa9t?",
+      "Chnowa t7eb tet3allem ta3mlou a7sen?",
+      "Chnowa nasi7a mazelt tetdhakkerha lyoum?",
+      "Chma3neha bennesba lik ki ensen yefhmek bel7a9?"
+    ],
+    deep: [
+      "Famma 7aja 3maltha w mazelt t9alla9 fik lyoum?",
+      "Chnowa 7aja tetmanna la3bed tefhemha 3lik akther?",
+      "Chnowa khouf t7eb tetghallab 3lih?",
+      "Waqtech s3ib 3lik totleb el mousa3da?",
+      "Famma 7aja mazelt t7awel tsema7 rou7ek 3liha?",
+      "Chnowa el 7aja elli yos3ob 3lik t9oulha belsout?",
+      "Waqtech 7assit rou7ek dh3if barcha?",
+      "Chnowa tkhaf tekhser, w 3lech?",
+      "Chma3neha bennesba lik ki t7ess elli la3bed 9ablinek kima enti?",
+      "Famma 7aja tetmanna tkhalliha wrak w tet3addeha?"
+    ]
+  }
+};
+const translations = {
+  it: {
+    tagline:"Carte, domande, conversazioni.<br>Per conoscersi davvero.", chooseLevel:"Scegli il livello di profondità",
+    lightName:"Leggere", lightDesc:"Per rompere<br>il ghiaccio", mediumName:"Medie", mediumDesc:"Esperienze<br>e relazioni", deepName:"Profonde", deepDesc:"Riflessioni<br>personali",
+    start:"Inizia il gioco&nbsp; →", footer:"Nessuna risposta è obbligatoria. Ascoltatevi, senza giudicare.", home:"← Home", changeLevel:"Cambia livello",
+    lightTitle:"Livello Leggero", mediumTitle:"Livello Medio", deepTitle:"Livello Profondo",
+    remaining:"Carte rimaste: ", complete:"Mazzo completato", tap:"Tocca la carta per scoprirla", draw:"Pesca un'altra carta ↻", next:"Prossima carta ↻", reveal:"Scopri la domanda", skip:"Salta questa domanda →",
+    helpHidden:"Girate la carta e lasciate spazio a tutti per rispondere.", helpShown:"Prendetevi il tempo per ascoltare e conversare.", helpTap:"Tocca la carta per scoprire la domanda.", notice:"💛 Potete rispondere a turno o liberamente. Se una domanda mette a disagio qualcuno, passate alla prossima.", finished:"Avete esplorato tutte le domande di questo livello.", restart:"Ricomincia il livello ↻", finishHelp:"Potete rigiocare il livello oppure sceglierne un altro."
+  },
+  tn: {
+    tagline:"Karta, as2la, w 7keyet.<br>Bech net3arfou 3la baadhna bel7a9.", chooseLevel:"Ekhtar 9addech t7eb el as2la tkoun 3ami9a",
+    lightName:"Khfifa", lightDesc:"Bech nabdew<br>el 7keya", mediumName:"MoutawassTa", mediumDesc:"Tajarob<br>w 3ala9at", deepName:"3ami9a", deepDesc:"ta'amulat<br>3ami9a",
+    start:"Ebda el lo3ba&nbsp; →", footer:"Ma fama 7atta ijeba majboura. Esma3ou baadhkom bla 7okm.", home:"← Erja3", changeLevel:"Baddel el niveau",
+    lightTitle:"Niveau khfif", mediumTitle:"Niveau moutawasset", deepTitle:"Niveau 3mi9",
+    remaining:"El wra9 elli ba9yin: ", complete:"El mazou kemel", tap:"Enzel 3al carta bech techouf essou2el", draw:"Carta okhra ↻", next:"Essou2el elli ba3dou ↻", reveal:"Warri essou2el", skip:"Fout essou2el hedha →",
+    helpHidden:"E9elbou el carta w khalliou kol we7ed ya7ki.", helpShown:"Khouthou wa9tkom bech tesm3ou baadhkom w ta7kiw.", helpTap:"Enzel 3al carta bech tchouf essou2el.", notice:"💛 Tnajemou ta7kiw bel dour wala kol we7ed kima y7eb. Ken sou2el y9alla9 7ad, foutouh w emchiw lel ba3dou.", finished:"Kammaltou as2let el niveau hedha.", restart:"Aawed el niveau ↻", finishHelp:"Tnajemou taawedou el niveau wala tekhtarou niveau ekher."
+  }
+};
+const config = {
+  light: { title:"Livello Leggero", symbol:"❧", color:"light", colorValue:"#355f47" },
+  medium: { title:"Livello Medio", symbol:"○", color:"medium", colorValue:"#8b611f" },
+  deep: { title:"Livello Profondo", symbol:"♡", color:"deep", colorValue:"#684d7c" }
+};
+let selectedLevel = "light";
+let currentLanguage = "it";
+let deck = [];
+let currentQuestion = null;
+let revealed = false;
+let drawnCount = 0;
+
+const homeScreen = document.getElementById("homeScreen");
+const gameScreen = document.getElementById("gameScreen");
+const card = document.getElementById("playingCard");
+const cardFront = document.getElementById("cardFront");
+const questionText = document.getElementById("questionText");
+const nextButton = document.getElementById("nextButton");
+const skipButton = document.getElementById("skipButton");
+const homeButton = document.getElementById("homeButton");
+
+function shuffle(items) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+function selectLevel(level) {
+  selectedLevel = level;
+  document.querySelectorAll(".level").forEach(button => {
+    const active = button.dataset.level === level;
+    button.classList.toggle("selected", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+document.querySelectorAll(".level").forEach(button => {
+  button.addEventListener("click", () => selectLevel(button.dataset.level));
+});
+function startGame() {
+  deck = shuffle(questions[currentLanguage][selectedLevel]);
+  drawnCount = 0;
+  homeScreen.classList.add("hidden");
+  gameScreen.classList.remove("hidden");
+  homeButton.classList.remove("hidden");
+  document.getElementById("levelTitle").textContent = translations[currentLanguage][selectedLevel + "Title"];
+  document.getElementById("progressBar").style.background = config[selectedLevel].colorValue;
+  drawCard();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function drawCard() {
+  if (deck.length === 0) {
+    currentQuestion = null;
+    card.classList.remove("flipped");
+    revealed = false;
+    questionText.textContent = translations[currentLanguage].finished;
+    document.getElementById("cardSymbol").textContent = config[selectedLevel].symbol;
+    document.getElementById("remaining").textContent = translations[currentLanguage].complete;
+    document.getElementById("progressBar").style.width = "0%";
+    nextButton.textContent = translations[currentLanguage].restart;
+    skipButton.classList.add("hidden");
+    document.getElementById("helpText").textContent = translations[currentLanguage].finishHelp;
+    cardFront.className = "card-face card-front " + config[selectedLevel].color;
+    return;
+  }
+  currentQuestion = deck.pop();
+  drawnCount++;
+  revealed = false;
+  card.classList.remove("flipped");
+  cardFront.className = "card-face card-front " + config[selectedLevel].color;
+  questionText.textContent = currentQuestion;
+  document.getElementById("cardSymbol").textContent = config[selectedLevel].symbol;
+  document.getElementById("remaining").textContent = translations[currentLanguage].remaining + deck.length;
+  document.getElementById("progressBar").style.width = (deck.length / questions[currentLanguage][selectedLevel].length * 100) + "%";
+  nextButton.textContent = translations[currentLanguage].draw;
+  skipButton.classList.add("hidden");
+  document.getElementById("helpText").textContent = translations[currentLanguage].helpHidden;
+}
+function flipCard() {
+  if (!currentQuestion) return;
+  revealed = !revealed;
+  card.classList.toggle("flipped", revealed);
+  skipButton.classList.toggle("hidden", !revealed);
+  nextButton.textContent = revealed ? translations[currentLanguage].next : translations[currentLanguage].reveal;
+  document.getElementById("helpText").textContent = revealed
+    ? translations[currentLanguage].helpShown
+    : translations[currentLanguage].helpTap;
+}
+function applyLanguage() {
+  currentLanguage = document.getElementById("languageSelect").value;
+  document.documentElement.lang = currentLanguage === "it" ? "it" : "en";
+  document.querySelectorAll("[data-i18n]").forEach(element => {
+    const key = element.dataset.i18n;
+    element.innerHTML = translations[currentLanguage][key];
+  });
+  skipButton.textContent = translations[currentLanguage].skip;
+  homeButton.textContent = translations[currentLanguage].home;
+  homeButton.setAttribute("aria-label", translations[currentLanguage].home);
+  document.getElementById("tapHint").textContent = translations[currentLanguage].tap;
+  document.getElementById("noticeText").textContent = translations[currentLanguage].notice;
+  if (!gameScreen.classList.contains("hidden")) {
+    document.getElementById("levelTitle").textContent = translations[currentLanguage][selectedLevel + "Title"];
+    if (deck.length === 0 && !currentQuestion) {
+      questionText.textContent = translations[currentLanguage].finished;
+      document.getElementById("remaining").textContent = translations[currentLanguage].complete;
+      nextButton.textContent = translations[currentLanguage].restart;
+      document.getElementById("helpText").textContent = translations[currentLanguage].finishHelp;
+    } else {
+      questionText.textContent = currentQuestion || "";
+      document.getElementById("remaining").textContent = translations[currentLanguage].remaining + deck.length;
+      nextButton.textContent = revealed ? translations[currentLanguage].next : translations[currentLanguage].draw;
+      document.getElementById("helpText").textContent = revealed ? translations[currentLanguage].helpShown : translations[currentLanguage].helpHidden;
+    }
+  }
+}
+function goHome() {
+  gameScreen.classList.add("hidden");
+  homeScreen.classList.remove("hidden");
+  homeButton.classList.add("hidden");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+document.getElementById("startButton").addEventListener("click", startGame);
+document.getElementById("languageSelect").addEventListener("change", () => {
+  const gameWasOpen = !gameScreen.classList.contains("hidden");
+  applyLanguage();
+  if (gameWasOpen) startGame();
+});
+card.addEventListener("click", flipCard);
+card.addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") { event.preventDefault(); flipCard(); }
+});
+nextButton.addEventListener("click", () => {
+  if (deck.length === 0) { startGame(); return; }
+  if (!revealed) { flipCard(); return; }
+  drawCard();
+});
+skipButton.addEventListener("click", drawCard);
+homeButton.addEventListener("click", goHome);
+applyLanguage();
+document.getElementById("changeLevelButton").addEventListener("click", goHome);
+</script>
+</body>
+</html>
