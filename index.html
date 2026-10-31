@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f3e9">
+<title>Giochi</title>
+<style>
+:root { color-scheme: light; --ink:#244b38; --cream:#f7f3e9; --green:#dfe9d9; --dark:#355f47; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 100% 0%,rgba(243,224,190,.45),transparent 35%),var(--cream); color:var(--ink); font-family:ui-rounded,"Avenir Next",Avenir,"Segoe UI",sans-serif; }
+main { width:min(100% - 32px,760px); margin:0 auto; padding:56px 0; }
+header { text-align:center; padding:32px 0 28px; }
+header .leaf { font-size:38px; }
+h1 { font:500 clamp(42px,8vw,64px) Georgia,"Times New Roman",serif; letter-spacing:-1.5px; margin:8px 0; }
+header p { color:#4f6557; line-height:1.6; }
+h2 { font:normal 23px Georgia,serif; margin:24px 0 14px; }
+.card { display:block; background:var(--green); border-radius:22px; padding:24px; color:var(--dark); text-decoration:none; box-shadow:0 14px 35px rgba(54,61,42,.10); transition:transform .18s,box-shadow .18s; }
+.card:hover { transform:translateY(-3px); box-shadow:0 18px 38px rgba(54,61,42,.16); }
+.card strong { display:block; font:normal 25px Georgia,serif; margin-bottom:8px; }
+.card span { line-height:1.5; }
+.arrow { float:right; font-size:24px; }
+footer { text-align:center; color:#6c756b; font-size:13px; margin-top:36px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="leaf" aria-hidden="true">❧</div>
+    <h1>Giochi</h1>
+    <p>Una raccolta di giochi da condividere.</p>
+  </header>
+  <section aria-labelledby="games-title">
+    <h2 id="games-title">Giochi disponibili</h2>
+    <a class="card" href="./bettertogether/">
+      <span class="arrow" aria-hidden="true">→</span>
+      <strong>Better Together</strong>
+      <span>Carte, domande e conversazioni per conoscersi davvero.</span>
+    </a>
+  </section>
+  <footer>Altri giochi arriveranno qui.</footer>
+</main>
+</body>
+</html>
